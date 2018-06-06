@@ -22,19 +22,19 @@ multmerge <- function(path){
 
 #Data----
 
-CBB_yby <- read.csv("Documents/Analytics/NBA Draft Model 2_0/br_college.csv") #year-by-year college statistics 2000-2018
-CBB_rsci <- read.csv("Documents/Analytics/NBA Draft Model 2_0/br_rsci2.csv") #year-by-year rsci rankings through 2017
+CBB_yby <- read.csv("br_college.csv") #year-by-year college statistics 2000-2018
+CBB_rsci <- read.csv("br_rsci2.csv") #year-by-year rsci rankings through 2017
 
 
 ##NBA Salary Data
-SalaryCap <- read.csv("Documents/Analytics/NBA Draft Model 1_0/NBA_SalaryCap_85_to_18.csv") #NBA salary cap history
-Salaries <- read.csv("Documents/Analytics/NBA Draft Model 1_0/NBA_Salaries_90_to_18.csv") #player contracts 1992-present (with gaps)
+SalaryCap <- read.csv("NBA_SalaryCap_85_to_18.csv") #NBA salary cap history
+Salaries <- read.csv("NBA_Salaries_90_to_18.csv") #player contracts 1992-present (with gaps)
 
 #Data Cleaning----
 
 ##CBB Data Cleaning
 #Merging Kenpom Data (changing team names)
-kenpom <- multmerge("Documents/Analytics/NBA Draft Model 1_0/kenpom")
+kenpom <- multmerge("kenpom")
 kenpom <- kenpom[,c("Season", "Team", "AdjTempo", "AdjOE", "AdjDE")]
 for(i in 1:nrow(kenpom)){
   kenpom$Team[i] <- ifelse(kenpom$Team[i] == "SMU", "Southern Methodist", kenpom$Team[i])
@@ -153,7 +153,7 @@ for(i in 1:nrow(CBB_career)){
 }
 
 #RSCI Draft
-CBB_rsci <- read.csv("Documents/Analytics/NBA Draft Model 2_0/br_rsci2.csv") #year-by-year rsci rankings through 2017
+CBB_rsci <- read.csv("br_rsci2.csv") #year-by-year rsci rankings through 2017
 CBB_rsci <- CBB_rsci %>%
   dplyr::select(Player, Draft, RSCI)
 
@@ -163,7 +163,7 @@ CBB_rsci <- CBB_rsci %>%
 CBB_rsci$RSCI <- as.numeric(gsub("T", "", CBB_rsci$RSCI))
 
 #NBA Draft Data
-draft <- multmerge("Documents/Analytics/NBA Draft Model 1_0/draft data") %>%
+draft <- multmerge("draft data") %>%
   dplyr::select(Player, Pos, Age, HT, WT, WS)
 
 #function to turn height/wingspan string into inches
@@ -277,7 +277,7 @@ Final$RSCI <- as.factor(Final$RSCI)
 
 write.csv(Final, "Documents/Analytics/NBA Draft Model 2_0/Final.csv")
 #Prospects----
-Prospects <- read.csv("Documents/Analytics/NBA Draft Model 2_0/DraftProspect.csv")
+Prospects <- read.csv("DraftProspect.csv")
 Prospects <- merge(Prospects, CBB_career, by.x = c("PLAYER", "TEAM"), by.y = c("Player", "School"), all.x = TRUE) %>%
   filter(YEAR != "International")
 
@@ -292,6 +292,6 @@ Prospects$HT <- as.numeric(gsub("\\/.*", "", Prospects$HT))*12 + as.numeric(gsub
 Prospects <- merge(Prospects, CBB_rsci[,c(1,3)], by.x = "PLAYER", by.y = "Player", all.x = TRUE)
 Prospects$RSCI <- ifelse(Prospects$RSCI <= 25, "Top25", ifelse(Prospects$RSCI <= 50, "Top50", ifelse(Prospects$RSCI <= 75, "Top75", ifelse(Prospects$RSCI <= 100, "Top100", "NR"))))
 Prospects$RSCI <- ifelse(is.na(Prospects$RSCI), "NR", Prospects$RSCI)
-Prospects$RSCI <- as.facotr(Prospects$RSCI)
+Prospects$RSCI <- as.factor(Prospects$RSCI)
 
 write.csv(Prospects, "Documents/Analytics/NBA Draft Model 2_0/Prospects.csv")

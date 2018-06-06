@@ -5,7 +5,7 @@ set_bart_machine_num_cores(4)
 library(ggplot2)
 
 #Training----
-Final <- read.csv("H:/NBA DRAFT/Final.csv")
+#Final <- read.csv("H:/NBA DRAFT/Final.csv")
 
 Final <- Final %>%
   dplyr::select(player, Per.Cap, percentile, RSCI, adjOE, adjDE, Age, HT, Pos2, Numb, G, X3PA, FTA, Poss,
@@ -87,7 +87,7 @@ draft.rf <- randomForest(Per.Cap ~ RSCI + adjOE + adjDE + Age + HT + Pos2 + Numb
 
 
 #Predicting 2018 Draft Class ----
-Prospects <- read.csv("H:/NBA DRAFT/Prospects.csv")
+Prospects <- read.csv("Prospects.csv")
 Prospects$RSCI <- as.factor(Prospects$RSCI)
 Prospects$Age <- Prospects$AGE
 Prospects$AGE <- NULL
@@ -106,7 +106,7 @@ Prospects$rating <- .5*Prospects$rf + .5*Prospects$bart
 #                            ifelse(Prospects$Pos2 == "Wing", Prospects$rf, Prospects$bart))
 
 BigBoard <- Prospects %>%
-  dplyr::select(PLAYER, TEAM, Pos2, bart, rf, rating)
+  dplyr::select(PLAYER, TEAM, Pos2, bart)
 
 write.csv(BigBoard, "H:/NBA DRAFT/BigBoard2.csv")
 
@@ -132,3 +132,25 @@ ggplot() +
         axis.text.y=element_blank(),
         axis.ticks.y=element_blank())
 
+#Function for pulling player distribution
+player_distr <- function(PlayerName){
+  simulations <- BB[which(grepl(PlayerName, Prospects$PLAYER)),]
+  df <- data.frame(X=simulations)
+  title <- paste(PlayerName)
+  plot.distr <- ggplot() +
+    geom_density(data=df, aes(X), alpha = 0.75, fill = "blue", color = "blue") +
+    annotate("text", x = mean(simulations), y = 7.5, label = PlayerName, color = "white") +
+    annotate("text", x = mean(simulations), y = 6.5, label = round(mean(simulations),2), color = "white") +
+    ggtitle(title) + xlab("PMVP") +
+    theme(axis.title.y=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.y=element_blank()) +
+    scale_x_continuous(limits = c(0,.3))
+  return(plot.distr)
+}
+player_distr("Trae Young")
+
+
+
+
+#Function for comparing player distributions
