@@ -72,19 +72,10 @@ Final.Board <- Final %>%
 #Bart Testing ----
 bart_machine_Cv <- bartMachine( Final[,c(4:30)], Final$Per.Cap, cov_prior_vec = prior)
 summary(bart_machine_Cv)
-#k_fold_cv(Final[,c(9:10,13,18:41)], Final$percentile, k_folds = 10, k = 3, nu = 3, q = 0.9, num_trees = 50)
-#k_fold_cv(Final[,c(9:10,13,18:41)], Final$percentile, k_folds = 10)
-#rmse_by_num_trees(bart_machine_Cv, num_replicates = 20)
-#investigate_var_importance(bart_machine_Cv, num_replicates_for_avg = 20)
 
 draft.rf <- randomForest(Per.Cap ~ RSCI + adjOE + adjDE + Age + HT + Pos2 + Numb + G + X3PA + FTA + Poss +
                            Ast.Pos + Tov.Pos + Stl.G + Blk.G + TS + FTA.G + Three.G + Two.G + 
                            Three.Per + Two.Per + FTA.FGA + Three.FGA + OR.G + DR.G + PF.G + adjTempo, training, ntree = 500, importance = T)
-
-#Final$bart <- predict(bart_machine_Cv, Final[,c(9:10,13,18:41)])
-#Final$rf <- predict(draft.rf, Final[,c(9:10,13,18:41)])
-#Final$rating <- .7*Final$rf + .3*Final$bart
-
 
 #Predicting 2018 Draft Class ----
 Prospects <- read.csv("Prospects.csv")
@@ -101,9 +92,6 @@ Prospects <- Prospects %>%
 Prospects$bart <- predict(bart_machine_Cv, Prospects[,c(4:30)])
 Prospects$rf <- predict(draft.rf, Prospects[,c(4:30)])
 Prospects$rating <- .5*Prospects$rf + .5*Prospects$bart
-#Prospects$rating2 <- .5*Prospects$rf + .5*Prospects$bart
-#Prospects$rating2 <- ifelse(Prospects$Pos2 == "PG", .2*Prospects$bart + .8*Prospects$rf, 
-#                            ifelse(Prospects$Pos2 == "Wing", Prospects$rf, Prospects$bart))
 
 BigBoard <- Prospects %>%
   dplyr::select(PLAYER, TEAM, Pos2, bart)
@@ -154,3 +142,25 @@ player_distr("Trae Young")
 
 
 #Function for comparing player distributions
+player_distr2 <- function(PlayerName, PlayerName2){
+  simulations <- BB[which(grepl(PlayerName, Prospects$PLAYER)),]
+  df <- data.frame(X=simulations)
+  simulations2 <- BB[which(grepl(PlayerName2, Prospects$PLAYER)),]
+  df2 <- data.frame(X=simulations2)
+  title <- paste(PlayerName, "&", PlayerName2, sep = " ")
+  plot.distr <- ggplot() +
+    geom_density(data=df, aes(X), alpha = 0.75, fill = "blue", color = "blue") +
+    annotate("text", x = .25, y = 12.5, label = PlayerName, color = "blue") +
+    annotate("text", x = .25, y = 11.5, label = round(mean(simulations),4), color = "blue") +
+    geom_density(data=df2, aes(X), alpha = 0.75, fill = "red", color = "red") +
+    annotate("text", x = .25, y = 10, label = PlayerName2, color = "red") +
+    annotate("text", x = .25, y = 9, label = round(mean(simulations2),4), color = "red") +
+    ggtitle(title) + xlab("PMVP") +
+    theme(axis.title.y=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.y=element_blank()) +
+    scale_x_continuous(limits = c(0,.3)) + theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=24, hjust=0)) +
+    theme(axis.title = element_text(color="black", face="bold", size=12))
+  return(plot.distr)
+}
+player_distr2("Trae Young", "DeAndre Ayton")
