@@ -128,12 +128,12 @@ player_distr <- function(PlayerName){
   plot.distr <- ggplot() +
     geom_density(data=df, aes(X), alpha = 0.75, fill = "blue", color = "blue") +
     annotate("text", x = mean(simulations), y = 7.5, label = PlayerName, color = "white") +
-    annotate("text", x = mean(simulations), y = 6.5, label = round(mean(simulations),2), color = "white") +
-    ggtitle(title) + xlab("PMVP") +
+    annotate("text", x = mean(simulations), y = 6.5, label = round(mean(simulations),4), color = "white") +
+    ggtitle(title) + xlab("PMVP: 5th Year Contract Value as Percentage of Salary Cap") +
     theme(axis.title.y=element_blank(),
           axis.text.y=element_blank(),
           axis.ticks.y=element_blank()) +
-    scale_x_continuous(limits = c(0,.3))
+    scale_x_continuous(limits = c(0,.25))
   return(plot.distr)
 }
 player_distr("Trae Young")
